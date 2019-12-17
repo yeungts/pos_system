@@ -1,0 +1,61 @@
+package posSystem.model;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import posSystem.db.DBConnector;
+
+/**
+ *
+ * @author kenye
+ */
+public class UserDb {
+
+    public UserDb() {
+    }
+
+    public static User getUser(String username, String password)
+            throws Exception {
+        
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        User user = null;
+        
+        try{
+            String driver = "com.mysql.jdbc.Driver";
+            String connURL = "jdbc:mysql://142.55.32.48:3306/";
+            String database = "yeungts_pos";
+            String account = "yeungts_admin";
+            String pass = "m!(t#@}CE4z(";
+
+            conn = DBConnector.getConnection(driver, connURL, database, account, pass);
+
+            String sql = "SELECT * FROM users WHERE username = '" + username
+                    + "' AND password = '" + password + "';";
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            if (rs.next()) {
+                String ID = rs.getString("userid");
+                String userName = rs.getString("username");
+                int manager = rs.getInt("manager");
+
+                user = new User(ID, userName, manager);
+            } else {
+                throw new Exception("User not found");
+            }
+        } catch (ClassNotFoundException ex) {
+            throw new Exception (ex.toString());
+        } catch (SQLException ex) {
+            throw new Exception (ex.toString());
+        } catch (Exception ex) {
+            throw new Exception (ex.toString());
+        } finally {
+            DBConnector.closeJDBCObjects(conn, stmt, rs);  
+        }
+
+        return user;
+    }
+}
